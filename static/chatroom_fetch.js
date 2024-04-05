@@ -39,4 +39,5 @@ async function fetchMessages() {
 
 
 // Fetch messages every 1 second
+fetchMessages()
 setInterval(fetchMessages, 1000);

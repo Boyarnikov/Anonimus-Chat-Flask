@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
 from typing import List
 import random
 import string
+import time
 
 app = Flask(__name__)
 
@@ -39,15 +40,27 @@ messages: List[Message] = [Message("USER1", "TEST"), Message("USER2", "TEST2")]
 print(messages)
 
 
-@app.route("/", methods=["GET"])
+@app.route("/", methods=["GET", "POST"])
 def get_chatroom():
+    if request.method == "POST":
+        print(request.form)
+        messages.append(
+            Message(f"USER{random.randint(1, 1000)}", request.form["text"])
+        )
+
+        response = make_response("Msg accepted!")
+        response.headers['Content-Type'] = "text/plain"
     """Отправляет html и front script"""
     return render_template("chatroom.html")
 
 
 @app.route("/post_message", methods=["POST"])
 def post_message():
-    pass
+    if request.form:
+        print(request.form)
+    response = make_response("Msg accepted!")
+    response.headers['Content-Type'] = "text/plain"
+    return response
 
 
 @app.route("/request_messages", methods=["FETCH"])
@@ -55,8 +68,8 @@ def request_messages():
     print(request.json)
     requested_messages = [m.to_dict() for m in messages if m.id > request.json['last_received_message_id']]
 
-    if random.random() > 0.9:
-        messages.append(Message.generate_random())
+    #if random.random() > 0.9:
+    #    messages.append(Message.generate_random())
     return requested_messages
     """Вернуть все актуальные сообщения"""
 
